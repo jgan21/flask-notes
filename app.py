@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
-from forms import RegisterUserForm
+from forms import RegisterUserForm, LoginUserForm
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -24,7 +24,7 @@ def redirect_to_register():
     return redirect('/register')
 
 @app.route('/register', methods = ["GET", "POST"])
-def show_register_user():
+def register_user():
     """Register user: produce form and handle form submission"""
 
     form = RegisterUserForm()
@@ -38,6 +38,8 @@ def show_register_user():
         last_name = form.last_name.data
 
         # TODO: maybe we should split this into a different function?
+        # Could also hide this logic in the register method of the User class
+        # Keep the flash in the route
         if User.query.get(username):
             errs.append("This username exists, please enter a new username.")
 
@@ -67,3 +69,25 @@ def show_register_user():
         return redirect(f"/users/{user.username}")
 
     return render_template('register-user-form.html', form=form)
+
+@app.route('/login', methods = ["GET", "POST"])
+def login_user():
+    """Login user: produce form and handle form submission"""
+
+    form = LoginUserForm()
+
+    if form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
+
+        user = User.authenticate(username, password)
+
+        # TODO: Make this more specific to false?
+        if user:
+            session["username"] = user.username
+            return redirect(f"/user/{user.username}")
+
+        else:
+            form.username.errors = ["Bad name/password"]
+
+    return render_template('login-form.html', form=form)

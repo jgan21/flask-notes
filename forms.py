@@ -30,3 +30,16 @@ class RegisterUserForm(FlaskForm):
         "Last Name",
         validators=[InputRequired(), Length(max = 30)]
     )
+
+class LoginUserForm (FlaskForm):
+    """Login User Form"""
+
+    username = StringField(
+        "Username",
+        validators=[InputRequired(), Length(max = 20)]
+    )
+    # TODO: Length restriction on password????
+    password = PasswordField(
+        "Password",
+        validators=[InputRequired(), Length(min = 8, max = 20)]
+    )
