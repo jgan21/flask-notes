@@ -4,24 +4,29 @@
 
 {% block content %}
 
-  <h1>Register Form</h1>
-  <form method="POST" class="register-form">
+<h1>Register Form</h1>
 
-    {{ form.hidden_tag() }}
+{% for msg in get_flashed_messages() %}
+<div class="alert">{{ msg }}</div>
+{% endfor %}
 
-    {% for field in form if field.widget.input_type != 'hidden' %}
-      <div>
-        {{ field.label }}
-        {{ field }}
+<form method="POST" class="register-form">
 
-        {% for error in field.errors %}
-          {{ error }}
-        {% endfor %}
-      </div>
+  {{ form.hidden_tag() }}
+
+  {% for field in form if field.widget.input_type != 'hidden' %}
+  <div>
+    {{ field.label }}
+    {{ field }}
+
+    {% for error in field.errors %}
+    {{ error }}
     {% endfor %}
+  </div>
+  {% endfor %}
 
-    <button type="submit" class="btn, btn-primary">Register</button>
+  <button type="submit" class="btn, btn-primary">Register</button>
 
-  </form>
+</form>
 
 {% endblock %}
