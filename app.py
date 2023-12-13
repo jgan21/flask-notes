@@ -19,7 +19,7 @@ toolbar = DebugToolbarExtension(app)
 
 @app.get('/')
 def redirect_to_register():
-    """Redirect root url to '/resiter'"""
+    """Redirect root url to '/register'"""
 
     return redirect('/register')
 
@@ -27,6 +27,8 @@ def redirect_to_register():
 @app.route('/register', methods = ["GET", "POST"])
 def register_user():
     """Register user: produce form and handle form submission"""
+
+    ##Check if anyone is logged in. If there is a user, redirect to their page
 
     form = RegisterUserForm()
     errs = []
@@ -62,10 +64,10 @@ def register_user():
             last_name=last_name
         )
 
-        db.session.add(user)
-        db.session.commit()
+        db.session.add(user) #keep this in the user.register method
+        db.session.commit() #move this outside of the method
 
-        session["username"] = user.username
+        session["username"] = user.username #make a global constant AUTH_KEY = 'username'
 
         return redirect(f"/users/{user.username}")
 
@@ -75,6 +77,8 @@ def register_user():
 @app.route('/login', methods = ["GET", "POST"])
 def login_user():
     """Login user: produce form and handle form submission"""
+
+    ## Check if anyone is logged in.
 
     form = LoginUserForm()
 
@@ -97,12 +101,13 @@ def login_user():
 
 @app.get("/users/<username>")
 def show_user_page(username):
-    """Authenticate user and display user page with information about user,
+    """Authenticate user and display user page with information about user, #TODO: This is an authorization!
     if invalid user, return redirect to homepage.
     """
+    # check: is someone logged in? IF so, check if session username is the same as current username
 
-    if username != session.get("username"):
-        return redirect("/")
+    if username != session.get("username"): #accessing the dict if it breaks throw an error, which is helpful
+        return redirect("/") #raise Unauthorized :  import Werkzeug
 
     form = CSRFProtectForm()
 
@@ -113,6 +118,7 @@ def show_user_page(username):
 @app.post("/logout")
 def logout_user():
     """Logs user our and redirects to homepage."""
+    #Check if someone is logged in.
 
     form = CSRFProtectForm()
     # breakpoint()

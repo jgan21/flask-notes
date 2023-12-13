@@ -13,7 +13,7 @@ class RegisterUserForm(FlaskForm):
     # TODO: Length restriction on password????
     password = PasswordField(
         "Password",
-        validators=[InputRequired(), Length(min = 8, max = 20)]
+        validators=[InputRequired(), Length(min = 8, max = 20)] #max longer
     )
 
     email = StringField(

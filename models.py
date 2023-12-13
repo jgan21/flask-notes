@@ -73,3 +73,13 @@ class User(db.Model):
             return False
 
 
+# class Note(db.Model):
+#     """Note."""
+
+#     id = db.Column(
+#         db.Integer,
+#         primary_key=True,
+#         autoincrement=True,
+#     )
+
+
