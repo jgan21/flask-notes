@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import connect_db, db, User
-from forms import RegisterUserForm, LoginUserForm
+from forms import RegisterUserForm, LoginUserForm, CSRFProtectForm
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
@@ -23,6 +23,7 @@ def redirect_to_register():
 
     return redirect('/register')
 
+
 @app.route('/register', methods = ["GET", "POST"])
 def register_user():
     """Register user: produce form and handle form submission"""
@@ -31,10 +32,10 @@ def register_user():
     errs = []
 
     if form.validate_on_submit():
-        username = form.username.data,
-        password = form.password.data,
-        email = form.email.data,
-        first_name = form.first_name.data,
+        username = form.username.data
+        password = form.password.data
+        email = form.email.data
+        first_name = form.first_name.data
         last_name = form.last_name.data
 
         # TODO: maybe we should split this into a different function?
@@ -64,11 +65,12 @@ def register_user():
         db.session.add(user)
         db.session.commit()
 
-        session["user.username"] = user.username
+        session["username"] = user.username
 
         return redirect(f"/users/{user.username}")
 
     return render_template('register-user-form.html', form=form)
+
 
 @app.route('/login', methods = ["GET", "POST"])
 def login_user():
@@ -85,9 +87,40 @@ def login_user():
         # TODO: Make this more specific to false?
         if user:
             session["username"] = user.username
-            return redirect(f"/user/{user.username}")
+            return redirect(f"/users/{user.username}")
 
         else:
             form.username.errors = ["Bad name/password"]
 
     return render_template('login-form.html', form=form)
+
+
+@app.get("/users/<username>")
+def show_user_page(username):
+    """Authenticate user and display user page with information about user,
+    if invalid user, return redirect to homepage.
+    """
+
+    if username != session.get("username"):
+        return redirect("/")
+
+    form = CSRFProtectForm()
+
+    user = User.query.get_or_404(username)
+    return render_template("user-page.html", form=form, user=user)
+
+
+@app.post("/logout")
+def logout_user():
+    """Logs user our and redirects to homepage."""
+
+    form = CSRFProtectForm()
+    # breakpoint()
+
+    if form.validate_on_submit():
+        session.pop("username", None)
+        # print("session=", session["username"])
+
+    return redirect("/")
+
+

@@ -43,3 +43,6 @@ class LoginUserForm (FlaskForm):
         "Password",
         validators=[InputRequired(), Length(min = 8, max = 20)]
     )
+
+class CSRFProtectForm(FlaskForm):
+    """Form just for CSRF Protection"""
